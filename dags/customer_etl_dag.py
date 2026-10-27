@@ -8,12 +8,18 @@ from datetime import datetime, timedelta
 import os
 import glob
 from airflow import DAG
-from airflow.operators.empty import EmptyOperator
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
+
+try:
+    from airflow.providers.standard.operators.empty import EmptyOperator
+    from airflow.providers.standard.operators.bash import BashOperator
+    from airflow.providers.standard.operators.python import PythonOperator
+except ImportError:
+    from airflow.operators.empty import EmptyOperator
+    from airflow.operators.bash import BashOperator
+    from airflow.operators.python import PythonOperator
 
 # Pipeline Paths
-BASE_DIR = os.getenv("AIRFLOW_HOME", "/opt/airflow")
+BASE_DIR = os.getenv("AIRFLOW_HOME", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
 DATA_DIR = os.path.join(BASE_DIR, "data")
 RAW_DIR = os.path.join(DATA_DIR, "raw")
@@ -47,7 +53,6 @@ def check_source_files_exist(**context):
 def validate_parquet_outputs(**context):
     """Verify that PySpark produced non-empty Parquet partition files."""
     c360_path = os.path.join(CURATED_DIR, "customer_360")
-    cat_path = os.path.join(CURATED_DIR, "category_daily_summary")
 
     if not os.path.exists(c360_path):
         raise FileNotFoundError(f"Target directory {c360_path} was not created!")
@@ -73,7 +78,7 @@ with DAG(
     dag_id="customer_360_pyspark_etl",
     default_args=default_args,
     description="Daily automated ingestion, PySpark transformation, and Parquet lakehouse loading",
-    schedule_interval="@daily",
+    schedule="@daily",
     catchup=False,
     max_active_runs=1,
     tags=["pyspark", "etl", "customer_360", "parquet", "lakehouse"],
