@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# PySpark & Hadoop
+derby.log
+metastore_db/
+spark-warehouse/
+*.parquet.crc
+.sparkStaging/
+
+# Airflow
+logs/
+airflow.cfg
+airflow.db
+webserver_config.py
+
+# Pytest & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data generated (keep sample generators, ignore huge binary dumps)
+data/curated/
+data/raw/clickstream.json
+data/raw/transactions.json
+
+# OS & IDE
+.DS_Store
+.idea/
+.vscode/
